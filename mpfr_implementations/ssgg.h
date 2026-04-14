@@ -52,7 +52,6 @@ inline bool index_search_SS (
     FP_NR<FP_T> SS_change = 0.0;
     FP_NR<FP_T> SS_change_max = delta_p * squared_sum;
     FP_NR<FP_T> projection_l_k = 0.0;
-    FP_NR<FP_T> ratio_projection_l_k = 0.0;
     FP_NR<FP_T> inv_ratio_projection_l_k = 0.0;
 
     for (int k=start_index+1; k<=end_index; k++) 
@@ -60,11 +59,10 @@ inline bool index_search_SS (
         // projection_l_k = \pi_{k-1}(\vb_{k}) (initially)
         // D^(k)_{k-1} = (projection_l_k)^2
         projection_l_k = B[k] + (mu[k][k-1] * mu[k][k-1] * B[k-1]);
-        // projection_l_l = \pi_{l}(\vb_{l}) = pB[k-1]
-        // ratio_projection_l_k = projection_l_k / projection_l_l
-        ratio_projection_l_k = projection_l_k / B[k-1];
         // SS_change = Old_SS - New_SS
-        SS_change = mu[k][k-1] * mu[k][k-1] * (1.0 - ratio_projection_l_k);  
+        // Use the same formula as the inner loop: mu^2 * B[k-1] * (B[k-1]/D_{k-1} - 1)
+        inv_ratio_projection_l_k = B[k-1] / projection_l_k;
+        SS_change = mu[k][k-1] * mu[k][k-1] * B[k-1] * (inv_ratio_projection_l_k - 1.0);  
 
         if (SS_change > SS_change_max) 
         {
@@ -79,7 +77,7 @@ inline bool index_search_SS (
             // D^(k)_{i} = (projection_l_k)^2
             projection_l_k += (mu[k][i] * mu[k][i] * B[i]);
             // projection_l_l = \pi_{l}(\vb_{l}) = pB[i]
-            // ratio_projection_l_k = projection_l_k / projection_l_l
+            // inv_ratio_projection_l_k = B[i] / projection_l_k
             inv_ratio_projection_l_k = B[i] / projection_l_k;
             // SS_change = Old_SS - New_SS
             SS_change += mu[k][i] * mu[k][i] * B[i] * (inv_ratio_projection_l_k - 1.0);  

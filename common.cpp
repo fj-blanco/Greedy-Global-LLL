@@ -677,18 +677,14 @@ T1 find_insertion_indices_SSGGLLL (T1 ** ppM, int ** ppBasis, T1 * pB, int n, in
 
    // For k = 1,...,n and j = k-1,...,1,0, we find the indices k, i where we insert b_k to reduce the value of SS the most
    for (int k=1; k<n; k++) {
-      // Initialise to the k-1 case
-      T1 delta_k_1 = 0.0;
-      delta_k_1 = (pB[k] + (ppM[k][k-1] * ppM[k][k-1] * pB[k-1])) / pB[k-1];
-
       // Initialise D_j = D_{k-1}
       T1 D_j = 0.0;
       D_j = (ppM[k][k-1] * ppM[k][k-1] * pB[k-1]) + pB[k];
 
-      // Initialise S_ik = S_{i-1,k}
-      // After initialising S and D, we can update them in the 'for' loop below for general S_jk and D_j for 0 <= j < k-1
+      // Initialise S_ik = S_{k-1,k}
+      // Use the same formula as the loop body: mu^2 * B_{k-1} * (B_{k-1}/D_{k-1} - 1)
       T1 S_ik = 0.0;
-      S_ik = ppM[k][k-1] * ppM[k][k-1] * (1 - delta_k_1);
+      S_ik = ppM[k][k-1] * ppM[k][k-1] * pB[k-1] * ((pB[k-1] / D_j) - 1);
 
       // Check if k, k-1 case improves upon current best
       if (S_ik > S_max) {
@@ -726,21 +722,16 @@ RR RR_find_insertion_indices_SSGGLLL (mat_RR ppM, mat_ZZ ppBasis, vec_RR pB, int
 
    // For k = 1,...,n and j = k-1,...,1,0, we find the indices k, i where we insert b_k to reduce the value of SS the most
    for (int k=1; k<n; k++) {
-      // Initialise to the k-1 case
-      RR delta_k_1;
-      delta_k_1 = 0;
-      delta_k_1 = (pB[k] + (ppM[k][k-1] * ppM[k][k-1] * pB[k-1])) / pB[k-1];
-
       // Initialise D_j = D_{k-1}
       RR D_j;
       D_j = 0;
       D_j = (ppM[k][k-1] * ppM[k][k-1] * pB[k-1]) + pB[k];
 
-      // Initialise S_ik = S_{i-1,k}
-      // After initialising S and D, we can update them in the 'for' loop below for general S_jk and D_j for 0 <= j < k-1
+      // Initialise S_ik = S_{k-1,k}
+      // Use the same formula as the loop body: mu^2 * B_{k-1} * (B_{k-1}/D_{k-1} - 1)
       RR S_ik;
       S_ik = 0;
-      S_ik = ppM[k][k-1] * ppM[k][k-1] * (1 - delta_k_1);
+      S_ik = ppM[k][k-1] * ppM[k][k-1] * pB[k-1] * ((pB[k-1] / D_j) - 1);
 
       // Check if k, k-1 case improves upon current best
       if (S_ik > S_max) {
@@ -1442,18 +1433,15 @@ mat_ZZ NTL_SS_LLL (mat_ZZ ppBasis, int m, int n, RR eta, long long int * pSwaps,
       }
 
       // For j = k-1,...,1,0, we find the index i where we insert b_k to reduce the value of SS the most
-      RR delta_k_1;
-      delta_k_1 = 0.0;
-      delta_k_1 = (pB[k] + (ppM[k][k-1] * ppM[k][k-1] * pB[k-1])) / pB[k-1];
 
       // Initialise D_j = D_{k-1}
       RR D_j;
       D_j = (ppM[k][k-1] * ppM[k][k-1] * pB[k-1]) + pB[k];
 
-      // Initialise S_ik = S_{i-1,k}
-      // After initialising S and D, we can update them in the 'for' loop below for general S_jk and D_j for 0 <= j < k-1
+      // Initialise S_ik = S_{k-1,k}
+      // Use the same formula as the loop body: mu^2 * B_{k-1} * (B_{k-1}/D_{k-1} - 1)
       RR S_ik;
-      S_ik = ppM[k][k-1] * ppM[k][k-1] * (1 - delta_k_1);
+      S_ik = ppM[k][k-1] * ppM[k][k-1] * pB[k-1] * ((pB[k-1] / D_j) - 1);
 
       int i = k-1;
 
@@ -2115,7 +2103,6 @@ int ** SS_LLL_std (int ** ppBasis, int m, int n, long double eta, long long int 
    	int k = 1;
 	int closest_integer = 0;
 
-	long double delta_k_1 = 0.0;
 	long double D_j = 0.0;
 	long double S_ik = 0.0;
 	long double S_lk = 0.0;
@@ -2152,14 +2139,13 @@ int ** SS_LLL_std (int ** ppBasis, int m, int n, long double eta, long long int 
      	 	}
 
       		// For j = k-1,...,1,0, we find the index i where we insert b_k to reduce the value of SS the most
-      		delta_k_1 = (pB[k] + (ppM[k][k-1] * ppM[k][k-1] * pB[k-1])) / pB[k-1];
 
       		// Initialise D_j = D_{k-1}
       		D_j = (ppM[k][k-1] * ppM[k][k-1] * pB[k-1]) + pB[k];
 
-      		// Initialise S_ik = S_{i-1,k}
-      		// After initialising S and D, we can update them in the 'for' loop below for general S_jk and D_j for 0 <= j < k-1
-      		S_ik = ppM[k][k-1] * ppM[k][k-1] * (1 - delta_k_1);
+      		// Initialise S_ik = S_{k-1,k}
+      		// Use the same formula as the loop body: mu^2 * B_{k-1} * (B_{k-1}/D_{k-1} - 1)
+      		S_ik = ppM[k][k-1] * ppM[k][k-1] * pB[k-1] * ((pB[k-1] / D_j) - 1);
 
       		int i = k-1;
 
